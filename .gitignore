@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# VS Code
+.vscode/
+
+# mypy
+.mypy_cache/
+
+# mlflow
+mlruns/
+
+# virtual env
+.venv/
