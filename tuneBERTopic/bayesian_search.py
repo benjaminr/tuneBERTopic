@@ -44,6 +44,7 @@ class BayesianOptimizationSearch(SearchStrategy):
                 param_dict = {
                     key: value for key, value in zip(self.param_grid.keys(), params)
                 }
+                mlflow.log_params(param_dict, "params")
                 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
                 vectorizer = CountVectorizer(
                     # min_df=param_dict['vectorizer__min_df'],

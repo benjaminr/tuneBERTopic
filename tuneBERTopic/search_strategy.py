@@ -40,16 +40,10 @@ class SearchStrategy:
         mlflow.log_param("num_documents", len(documents))
         mlflow.log_param("num_unique_words", len(dictionary))
         mlflow.log_param("topics", topic_words)
-        # log all 4 coherence metrics
-        for metric in ["c_v", "u_mass", "c_uci", "c_npmi"]:
-            coherence_model = CoherenceModel(
-                topics=topic_words, texts=texts, dictionary=dictionary, coherence=metric
-            )
-            coherence_score = coherence_model.get_coherence()
-            mlflow.log_metric(f"{metric}_coherence", coherence_score)
         # return c_v coherence score
         coherence_model = CoherenceModel(
             topics=topic_words, texts=texts, dictionary=dictionary, coherence="c_v"
         )
         coherence_score = coherence_model.get_coherence()
+        mlflow.log_metric(f"coherence_score", coherence_score)
         return coherence_score
