@@ -15,5 +15,10 @@ poetry install
 ## Run
 
 ```
+# setup the mlflow tracking server
+mlflow server --host 127.0.0.1 --port 8080
+
+# start the runs
 poetry run python main.py
 ```
+
