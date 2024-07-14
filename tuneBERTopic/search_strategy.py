@@ -35,15 +35,17 @@ class SearchStrategy:
         topic_words = [
             topic for topic in topic_words if not all(v == "" for v in topic)
         ]
-        # log to mlflow
-        mlflow.log_param("num_topics", len(topic_words))
-        mlflow.log_param("num_documents", len(documents))
-        mlflow.log_param("num_unique_words", len(dictionary))
-        mlflow.log_param("topics", topic_words)
-        # return c_v coherence score
-        coherence_model = CoherenceModel(
-            topics=topic_words, texts=texts, dictionary=dictionary, coherence="c_v"
-        )
-        coherence_score = coherence_model.get_coherence()
-        mlflow.log_metric(f"coherence_score", coherence_score)
-        return coherence_score
+        if topic_words:
+            # log to mlflow
+            mlflow.log_param("num_topics", len(topic_words))
+            mlflow.log_param("num_documents", len(documents))
+            mlflow.log_param("num_unique_words", len(dictionary))
+            mlflow.log_param("topics", topic_words)
+            # return c_v coherence score
+            coherence_model = CoherenceModel(
+                topics=topic_words, texts=texts, dictionary=dictionary, coherence="c_v"
+            )
+            coherence_score = coherence_model.get_coherence()
+            mlflow.log_metric(f"coherence_score", coherence_score)
+            return coherence_score
+        return -1

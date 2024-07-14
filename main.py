@@ -1,31 +1,45 @@
-
-from sklearn.datasets import fetch_20newsgroups
+import argparse
+import logging
 from bertopic import BERTopic
 from tuneBERTopic.bayesian_search import BayesianOptimizationSearch
+from tuneBERTopic.data import load_data, load_parameter_file
 
 
-if __name__ == '__main__':
-    param_grid = {
-        'vectorizer__min_df': [1, 2, 5],
-        'vectorizer__max_df': [0.9, 0.95, 1.0],
-        'vectorizer__ngram_range': [(1, 1), (1, 2)],
-        'umap__n_neighbors': [5, 10, 15],
-        'umap__n_components': [5, 10, 15],
-        'umap__metric': ['euclidean', 'cosine'],
-        'hdbscan__min_cluster_size': [5, 10, 15],
-        'hdbscan__min_samples': [1, 5, 10],
-    }
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("parameter_file", type=str)
+    argparser.add_argument("--data_path", type=str, default=None)
+    argparser.add_argument("--categories", type=str, nargs="*", default=None)
+    argparser.add_argument("--max_num_samples", type=int, default=1000)
+    argparser.add_argument("--strategy", type=str, default="bayesian")
+    argparser.add_argument("--log-level", type=str, default="INFO")
+    args = argparser.parse_args()
 
-    # Fetch sample dataset
-    categories = ['sci.space']
-    newsgroups_subset = fetch_20newsgroups(subset='all', categories=categories, remove=('headers', 'footers', 'quotes'))
-    documents = newsgroups_subset.data[:1000]
+    logging.basicConfig(level=args.log_level)
 
-    # Select and run the search strategy
-    strategy = 'bayesian'
-    search = BayesianOptimizationSearch(param_grid)
+    params = load_parameter_file(args.parameter_file)
+    logging.info(f"Loaded parameters: {params}")
+
+    if args.data_path:
+        logging.info(f"Loading data from {args.data_path}")
+        documents = load_data(data_path=args.data_path)
+    else:
+        logging.info(
+            f"Loading sample data, with categories: {args.categories} and max_num_samples: {args.max_num_samples}"
+        )
+        documents = load_data(
+            use_sample=True,
+            max_num_samples=args.max_num_samples,
+            categories=args.categories,
+        )
+
+    if args.strategy == "bayesian":
+        logging.info("Using Bayesian Optimization search strategy")
+        search = BayesianOptimizationSearch(params)
+
+    logging.info("Starting search...")
     best_params, best_score = search.search(documents, BERTopic)
 
     # Print the best parameters and score
-    print("Best Parameters:", best_params)
-    print("Best Score:", best_score)
+    logging.info(f"Best Parameters: {best_params}")
+    logging.info(f"Best Score: {best_score}")

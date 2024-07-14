@@ -47,8 +47,8 @@ class BayesianOptimizationSearch(SearchStrategy):
                 mlflow.log_params(param_dict, "params")
                 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
                 vectorizer = CountVectorizer(
-                    # min_df=param_dict['vectorizer__min_df'],
-                    # max_df=param_dict['vectorizer__max_df'],
+                    min_df=param_dict['vectorizer__min_df'],
+                    max_df=param_dict['vectorizer__max_df'],
                     ngram_range=param_dict["vectorizer__ngram_range"],
                     stop_words="english",
                 )
