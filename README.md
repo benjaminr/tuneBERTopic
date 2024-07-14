@@ -18,7 +18,13 @@ poetry install
 # setup the mlflow tracking server
 mlflow server --host 127.0.0.1 --port 8080
 
-# start the runs
-poetry run python main.py
+# Run against a document file (newline delimetered)
+poetry run python main.py parameters.yaml --data-path /path/to/documents_file
+
+# Example run against the 'sci.space' category with the example parameters file
+poetry run python main.py parameters.yaml --categories sci.space
+
+# Example run against the 'sci.space' category with the example parameters file and a max number of samples
+poetry run python main.py parameters.yaml --categories sci.space --max-num=samples 100
 ```
 

@@ -8,9 +8,9 @@ from tuneBERTopic.data import load_data, load_parameter_file
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("parameter_file", type=str)
-    argparser.add_argument("--data_path", type=str, default=None)
+    argparser.add_argument("--data-path", type=str, default=None)
     argparser.add_argument("--categories", type=str, nargs="*", default=None)
-    argparser.add_argument("--max_num_samples", type=int, default=1000)
+    argparser.add_argument("--max-num-samples", type=int, default=1000)
     argparser.add_argument("--strategy", type=str, default="bayesian")
     argparser.add_argument("--log-level", type=str, default="INFO")
     args = argparser.parse_args()
