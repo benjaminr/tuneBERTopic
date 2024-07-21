@@ -1,10 +1,11 @@
 import mlflow
 from hyperopt import fmin, tpe, hp, Trials
-from tuneBERTopic.search_strategy import SearchStrategy
+from tunebertopic.tuning.base import SearchStrategy
 from sklearn.feature_extraction.text import CountVectorizer
 from umap import UMAP
 from hdbscan import HDBSCAN
 from sentence_transformers import SentenceTransformer
+from bertopic.representation import MaximalMarginalRelevance
 
 
 class BayesianOptimizationSearch(SearchStrategy):
@@ -23,7 +24,7 @@ class BayesianOptimizationSearch(SearchStrategy):
         SearchStrategy (class): The parent class for the search strategies.
     """
 
-    def search(self, documents, model_class):
+    def search(self, documents, model_class, metric, llm):
         """Search for the best hyperparameters using Bayesian Optimization.
 
         Args:
@@ -46,6 +47,7 @@ class BayesianOptimizationSearch(SearchStrategy):
                 }
                 mlflow.log_params(param_dict, "params")
                 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+                representation_model = MaximalMarginalRelevance(diversity=param_dict["bertopic__representation__diversity"])
                 vectorizer = CountVectorizer(
                     min_df=param_dict['vectorizer__min_df'],
                     max_df=param_dict['vectorizer__max_df'],
@@ -67,10 +69,11 @@ class BayesianOptimizationSearch(SearchStrategy):
                     vectorizer_model=vectorizer,
                     umap_model=umap_model,
                     hdbscan_model=hdbscan_model,
+                    nr_topics=param_dict["bertopic__nr_topics"],
+                    representation_model=representation_model
                 )
                 model.fit(documents)
-                score = self.evaluate_model(model, documents)
-                return 1 - score
+                return self.evaluate_model(model, documents, metric=metric, llm=llm)
 
         search_space = [hp.choice(key, value) for key, value in self.param_grid.items()]
         trials = Trials()

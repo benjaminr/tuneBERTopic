@@ -1,9 +1,13 @@
 import argparse
 import logging
 from bertopic import BERTopic
-from tuneBERTopic.bayesian_search import BayesianOptimizationSearch
-from tuneBERTopic.data import load_data, load_parameter_file
+from tunebertopic.tuning.bayesian_search import BayesianOptimizationSearch
+from tunebertopic.data import load_data, load_parameter_file
 
+
+logger = logging.getLogger("tunebertopic")
+console = logging.StreamHandler()
+logger.addHandler(console)
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
@@ -12,19 +16,21 @@ if __name__ == "__main__":
     argparser.add_argument("--categories", type=str, nargs="*", default=None)
     argparser.add_argument("--max-num-samples", type=int, default=1000)
     argparser.add_argument("--strategy", type=str, default="bayesian")
+    argparser.add_argument("--metric", type=str, default="coherence")
+    argparser.add_argument("--llm", type=str, default="openai")
     argparser.add_argument("--log-level", type=str, default="INFO")
     args = argparser.parse_args()
 
-    logging.basicConfig(level=args.log_level)
+    logger.setLevel(args.log_level)
 
     params = load_parameter_file(args.parameter_file)
-    logging.info(f"Loaded parameters: {params}")
+    logger.info(f"Loaded parameters: {params}")
 
     if args.data_path:
-        logging.info(f"Loading data from {args.data_path}")
+        logger.info(f"Loading data from {args.data_path}")
         documents = load_data(data_path=args.data_path)
     else:
-        logging.info(
+        logger.info(
             f"Loading sample data, with categories: {args.categories} and max_num_samples: {args.max_num_samples}"
         )
         documents = load_data(
@@ -32,14 +38,15 @@ if __name__ == "__main__":
             max_num_samples=args.max_num_samples,
             categories=args.categories,
         )
+    documents = [doc for doc in documents if len(doc.strip()) > 0]
 
     if args.strategy == "bayesian":
-        logging.info("Using Bayesian Optimization search strategy")
+        logger.info("Using Bayesian Optimization search strategy")
         search = BayesianOptimizationSearch(params)
 
-    logging.info("Starting search...")
-    best_params, best_score = search.search(documents, BERTopic)
+    logger.info("Starting search...")
+    best_params, best_score = search.search(documents, BERTopic, args.metric, args.llm)
 
     # Print the best parameters and score
-    logging.info(f"Best Parameters: {best_params}")
-    logging.info(f"Best Score: {best_score}")
+    logger.info(f"Best Parameters: {best_params}")
+    logger.info(f"Best Score: {best_score}")
