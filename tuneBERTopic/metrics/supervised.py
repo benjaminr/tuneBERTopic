@@ -12,12 +12,13 @@ from tunebertopic.llm.models.base import LLMModel
 logger = logging.getLogger("tunebertopic")
 
 def precision(topic_model: BERTopic, documents):
-    logger.info("Calculating precision score")
-    ground_truth = [...]  # Add actual ground truth labels
-    predicted_topics = [...]  # Extract predicted topics from topic_model
-    precision = precision_score(ground_truth, predicted_topics, average="binary")
-    mlflow.log_metric(f"precision_score", precision)
-    return precision
+    pass
+    # logger.info("Calculating precision score")
+    # ground_truth = [...]  # Add actual ground truth labels
+    # predicted_topics = [...]  # Extract predicted topics from topic_model
+    # precision = precision_score(ground_truth, predicted_topics, average="binary")
+    # mlflow.log_metric(f"precision_score", precision)
+    # return precision
 
 
 def rouge(topic_model: BERTopic, documents, llm_model: LLMModel):
